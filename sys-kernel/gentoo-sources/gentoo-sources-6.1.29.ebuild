@@ -284,10 +284,12 @@ src_prepare() {
 		tweak_config 'CONFIG_SYSTEM_EXTRA_CERTIFICATE=y'
 		tweak_config 'CONFIG_SYSTEM_EXTRA_CERTIFICATE_SIZE="4096"'
 		tweak_config "CONFIG_MODULE_SIG_SHA512=y"
+	else
+		tweak_config 'CONFIG_MODULE_SIG=n'
 	fi
 
 	# get config into good state:
-	yes "" | make oldconfig >/dev/null 2>&1 || die
+	yes "" | make olddefconfig >/dev/null 2>&1 || die
 	cp .config "${T}"/.config || die
 	make -s mrproper || die "make mrproper failed"
 }
@@ -311,6 +313,7 @@ src_compile() {
 		cp "${T}"/.config "${WORKDIR}"/build/.config
 
 		GKARGS=(
+			# configure genkernel (log, cache, etc)
 			--color
 			--makeopts="${MAKEOPTS}"
 			--logfile="${WORKDIR}"/genkernel/log/genkernel.log
@@ -318,8 +321,11 @@ src_compile() {
 			--tmpdir="${WORKDIR}"/genkernel/temp
 			$(usex debug --loglevel=5 --loglevel=1)
 
-			--no-save-config
+			# configure kernel build
+			--no-clean
+			--no-mrproper
 			--no-oldconfig
+			--no-save-config
 			--no-menuconfig
 			--no-module-rebuild
 			--kernel-config="${T}/.config"
@@ -328,6 +334,7 @@ src_compile() {
 			--kernel-modules-prefix="${WORKDIR}"/out
 			--bootdir="${WORKDIR}"/out/boot
 
+			# configure initramfs build
 			--all-ramdisk-modules
 			--compress-initramfs
 			--compress-initramfs-type=xz
@@ -357,8 +364,8 @@ install_kernel_and_friends() {
 
 src_install() {
 
-	# 'standard' install of kernel sources that most consumers are used to ...
-	# i.e. install sources to /usr/src/linux-${KERNEL_FULL_VERSION} and manually compile the kernel.
+	# 'standard' install of kernel sources that users are used to ...
+	# i.e. install sources to /usr/src/linux-${KERNEL_FULL_VERSION} and manually build the kernel.
 	if ! use build-kernel; then
 
 		# create kernel sources directory
@@ -373,8 +380,8 @@ src_install() {
 		# copy kconfig into place
 		cp "${T}"/.config "${D}"/usr/src/linux-${KERNEL_FULL_VERSION}/.config || die "failed to install kernel config"
 
-	# let Portage handle the compilation, testing and installing of the kernel + initramfs,
 	# and optionally installing kernel headers + signing the kernel modules.
+	# we had Portage handle the build, testing and now the install of the kernel, initramfs + sources/headers.
 	elif use build-kernel; then
 
 		# ... maybe incoporate some [[ ${MERGE_TYPE} != foobar ]] so that headers can
