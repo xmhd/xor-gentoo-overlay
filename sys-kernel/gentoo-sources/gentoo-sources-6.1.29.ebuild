@@ -15,9 +15,9 @@ SLOT="${PV%%_p*}"
 RESTRICT="binchecks mirror strip"
 
 # general kernel USE flags
-IUSE="build-kernel clang compress debug minimal +symlink"
+IUSE="build-kernel clang compress debug libressl minimal +symlink"
 # security
-IUSE="${IUSE} cpu-mitigations hardened +kpti +retpoline selinux sign-modules"
+IUSE="${IUSE} +cpu-mitigations hardened selinux sign-modules"
 # initramfs
 IUSE="${IUSE} btrfs +firmware luks lvm mdadm microcode plymouth udev zfs"
 # misc kconfig tweaks
@@ -47,7 +47,10 @@ RDEPEND="
 		sys-boot/plymouth[libkms,udev]
 	)
 	sign-modules? (
-		dev-libs/openssl
+		|| (
+			!libressl? ( dev-libs/openssl )
+			libressl? ( dev-libs/libressl )
+		)
 		sys-apps/kmod
 	)
 	zfs? ( sys-fs/zfs )

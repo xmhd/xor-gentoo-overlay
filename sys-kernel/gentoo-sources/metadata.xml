@@ -12,6 +12,7 @@
 		<flag name="cpu-mitigations">Enable cpu mitigations</flag>
 		<flag name="firmware">Include firmware in the initramfs</flag>
 		<flag name="hardened">Apply kernel hardening patch set and CONFIG_* tweaks</flag>
+		<flag name="libressl">TODO</flag>
 		<flag name="luks">Enable support for luks in the kernel + initramfs</flag>
 		<flag name="lvm">Enable support for lvm in the kernel + initramfs</flag>
 		<flag name="mcelog">Enable support for mcelog in the kernel</flag>
