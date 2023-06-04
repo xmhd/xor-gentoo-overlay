@@ -15,7 +15,7 @@ SLOT="${PV%%_p*}"
 RESTRICT="binchecks mirror strip"
 
 # general kernel USE flags
-IUSE="build-kernel clang compress debug libressl minimal +symlink"
+IUSE="+build-kernel clang compress debug libressl minimal +symlink"
 # security
 IUSE="${IUSE} +cpu-mitigations hardened selinux sign-modules"
 # initramfs
