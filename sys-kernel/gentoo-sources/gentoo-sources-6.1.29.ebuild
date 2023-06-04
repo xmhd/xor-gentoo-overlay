@@ -141,8 +141,6 @@ pkg_pretend() {
 
 pkg_setup() {
 
-	export REAL_ARCH="${ARCH}"
-
 	# will interfere with Makefile if set
 	unset ARCH
 	unset LDFLAGS
