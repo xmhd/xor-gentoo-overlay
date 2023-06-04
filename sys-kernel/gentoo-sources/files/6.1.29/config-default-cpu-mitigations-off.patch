@@ -1,0 +1,64 @@
+From: Breno Leitao <leitao@debian.org>
+To: tglx@linutronix.de, bp@alien8.de,
+	pawan.kumar.gupta@linux.intel.com, paul@paul-moore.com
+Cc: leit@meta.com, x86@kernel.org, linux-kernel@vger.kernel.org
+Subject: [RFC PATCH] cpu/bugs: Disable CPU mitigations at compilation time
+Date: Thu,  2 Feb 2023 10:08:58 -0800	[thread overview]
+Message-ID: <20230202180858.1539234-1-leitao@debian.org> (raw)
+
+Right now it is not possible to disable CPU vulnerabilities mitigations
+at build time. Mitigation needs to be disabled passing kernel
+parameters, such as 'mitigations=off'.
+
+This patch creates an easy way to disable mitigation during compilation
+time (CONFIG_DEFAULT_CPU_MITIGATIONS_OFF), so, insecure kernel users don't
+need to deal with kernel parameters when booting insecure kernels.
+
+Signed-off-by: Breno Leitao <leitao@debian.org>
+---
+ kernel/cpu.c     |  5 +++++
+ security/Kconfig | 11 +++++++++++
+ 2 files changed, 16 insertions(+)
+
+diff --git a/kernel/cpu.c b/kernel/cpu.c
+index 6c0a92ca6bb5..497e9a3d3d77 100644
+--- a/kernel/cpu.c
++++ b/kernel/cpu.c
+@@ -2727,8 +2727,13 @@ enum cpu_mitigations {
+ 	CPU_MITIGATIONS_AUTO_NOSMT,
+ };
+ 
++#ifdef CONFIG_DEFAULT_CPU_MITIGATIONS_OFF
++static enum cpu_mitigations cpu_mitigations __ro_after_init =
++	CPU_MITIGATIONS_OFF;
++#else
+ static enum cpu_mitigations cpu_mitigations __ro_after_init =
+ 	CPU_MITIGATIONS_AUTO;
++#endif
+ 
+ static int __init mitigations_parse_cmdline(char *arg)
+ {
+diff --git a/security/Kconfig b/security/Kconfig
+index e6db09a779b7..a70427dc6ace 100644
+--- a/security/Kconfig
++++ b/security/Kconfig
+@@ -258,6 +258,17 @@ config LSM
+ 
+ 	  If unsure, leave this as the default.
+ 
++config CONFIG_DEFAULT_CPU_MITIGATIONS_OFF
++	bool "Disable mitigations for CPU vulnerabilities by default"
++	default n
++	help
++	  This option disable mitigations for CPU vulnerabilities by default.
++	  This improves system performance, but it may also expose users
++	  to several CPU vulnerabilities.
++	  This has the same effect as passing `mitigations=off` kernel
++	  parameter. The mitigations could be enabled back passing the
++	  'mitigations' parameter.
++
+ source "security/Kconfig.hardening"
+ 
+ endmenu
+-- 
+2.30.2
