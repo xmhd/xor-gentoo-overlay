@@ -168,9 +168,6 @@ src_prepare() {
 	# TODO
 	eapply "${FILESDIR}/${KERNEL_VERSION}/config-default-cpu-mitigations-off.patch"
 
-	# Restore the original Linux default of allowing devices to negotiate their own connection interval
-	eapply "${FILESDIR}/${KERNEL_VERSION}/fix-bluetooth-polling.patch"
-
 	# apply any user patches
 	eapply_user
 
