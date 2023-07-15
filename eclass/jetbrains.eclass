@@ -279,7 +279,7 @@ jetbrains_src_install() {
 	insinto "${install_dir}"
 	doins -r *
 
-	find "${D}"/"${install_dir}"/bin/ -type f \( -name "*.sh" -o -name "*.py" -o "fsnotifier"  \) -exec chmod 755 {} + || die "failed to fperms executable files"
+	find "${D}"/"${install_dir}"/bin/ -type f \( -name "*.sh" -o -name "*.py" \) -exec chmod 755 {} + || die "failed to fperms executable files"
 
 	make_wrapper "${PN}" "${install_dir}"/bin/${MY_NAME}.sh
 	newicon bin/${MY_NAME}.svg "${PN}".svg
